@@ -6,7 +6,7 @@
       "name": "WorkBuddy",
       "description": "Tencent CodeBuddy (WorkBuddy) OAuth provider for CLIProxyAPI: multi-account login, dynamic models, chat executor, CN daily check-in, Global one-shot expert trial (manual), credit lifecycle (disable CN / delete Global when exhausted), credits panel with CN/Global filters, optional credits-aware scheduler.",
       "author": "Sliverkiss",
-      "version": "0.8.5",
+      "version": "0.8.6",
       "repository": "https://github.com/Sliverkiss/cpa-plugin",
       "logo": "https://raw.githubusercontent.com/DGZSbot/ai-icon/refs/heads/main/WorkBuddy.png",
       "homepage": "https://github.com/Sliverkiss/cpa-plugin/tree/main/workbuddy",
@@ -24,44 +24,44 @@
           {
             "goos": "linux",
             "goarch": "amd64",
-            "url": "https://github.com/Sliverkiss/cpa-plugin/releases/download/workbuddy-v0.8.5/workbuddy_0.8.5_linux_amd64.zip",
-            "sha256": "00519e60dbdbe5eb91298f1c5d2770005ab92eea9004150a4e10423abb718677"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_linux_amd64.zip",
+            "sha256": "68a7f5f0964c9812382a9f6269ac5015ecbe30732a7e117b782359514b18654d"
           },
           {
             "goos": "linux",
             "goarch": "arm64",
-            "url": "https://github.com/Sliverkiss/cpa-plugin/releases/download/workbuddy-v0.8.5/workbuddy_0.8.5_linux_arm64.zip",
-            "sha256": "76ff89408cc3598d26d8399543478be62f99e725f90b8c721f61c73012327e80"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_linux_arm64.zip",
+            "sha256": "0ef14789f021e7fd8504e44a062ad4c2f712f26188233a91dbba85f31cc7b24a"
           },
           {
             "goos": "darwin",
             "goarch": "amd64",
-            "url": "https://github.com/Sliverkiss/cpa-plugin/releases/download/workbuddy-v0.8.5/workbuddy_0.8.5_darwin_amd64.zip",
-            "sha256": "22947b4617f6e109103cd8cae347934f5786f7a36eecfe40400b2977fc72505b"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_darwin_amd64.zip",
+            "sha256": "0e88ddd9155405764530b260c3ced1074b68a0a3a92aa0c0e5e8544de8b45387"
           },
           {
             "goos": "darwin",
             "goarch": "arm64",
-            "url": "https://github.com/Sliverkiss/cpa-plugin/releases/download/workbuddy-v0.8.5/workbuddy_0.8.5_darwin_arm64.zip",
-            "sha256": "b557dbc1d812bd166271f080e3c2d6f2137f8d68bd36568a62f1ac48eb2b87e2"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_darwin_arm64.zip",
+            "sha256": "3515bc65047d2ac12819d626ccc9ab9d332b3be794540209b104f6699d38d0ea"
           },
           {
             "goos": "windows",
             "goarch": "amd64",
-            "url": "https://github.com/Sliverkiss/cpa-plugin/releases/download/workbuddy-v0.8.5/workbuddy_0.8.5_windows_amd64.zip",
-            "sha256": "c83a450d9c17c1a65358a58301df8d798fee0e7c42c84d44f19d857884915597"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_windows_amd64.zip",
+            "sha256": "fc8ac74dc5a09c3089a83e92f5d470917ab8ec402744f3bcafba818f618fb2e3"
           },
           {
             "goos": "windows",
             "goarch": "arm64",
-            "url": "https://github.com/Sliverkiss/cpa-plugin/releases/download/workbuddy-v0.8.5/workbuddy_0.8.5_windows_arm64.zip",
-            "sha256": "7dd3ebf6db86320e6d4a00739cc812c0a82703a65e17a81e1771a21b93e09e8b"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_windows_arm64.zip",
+            "sha256": "e5d272ff9a1658eea802d28df633dc78d3c9b3358ae116b7528c51fd5547d3bd"
           },
           {
             "goos": "freebsd",
             "goarch": "amd64",
-            "url": "https://github.com/Sliverkiss/cpa-plugin/releases/download/workbuddy-v0.8.5/workbuddy_0.8.5_freebsd_amd64.zip",
-            "sha256": "535102872529504c038df9b24eedc8fccc97932ca3bf625ec871e5c62f2b3f12"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_freebsd_amd64.zip",
+            "sha256": "c1ec43a3eb1a7bcf9a60ea5cfc59743cec8f8d4eabf9d988583d1c6aa8013c3d"
           }
         ]
       }
