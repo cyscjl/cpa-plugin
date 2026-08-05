@@ -71,7 +71,7 @@
       "name": "QoderWork",
       "description": "QoderWork CN (qoder.com.cn) provider for CLIProxyAPI: dual login (OAuth device authorization with auto pro-pack claim + PAT import), COSY-signed chat executor, dynamic model list, daily check-in with credit snapshot, token keepalive (deviceToken/jobToken prefix-routed, PAT fallback), accounts panel.",
       "author": "Sliverkiss",
-      "version": "0.4.1",
+      "version": "0.4.2",
       "repository": "https://github.com/cyscjl/cpa-plugin",
       "logo": "https://raw.githubusercontent.com/DGZSbot/ai-icon/refs/heads/main/QoderWork.png",
       "homepage": "https://github.com/cyscjl/cpa-plugin/tree/main/qoderwork",
@@ -89,44 +89,44 @@
           {
             "goos": "linux",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.1/qoderwork_0.4.1_linux_amd64.zip",
-            "sha256": "fac2d38efb4dafd20003739498767980c880504c17b688fee4741c93eb4480e8"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_linux_amd64.zip",
+            "sha256": "7371bd17c8420867ea91561091a4be41f01f890f9a4531b6983e6c5378dd41b1"
           },
           {
             "goos": "linux",
             "goarch": "arm64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.1/qoderwork_0.4.1_linux_arm64.zip",
-            "sha256": "adc9f0d22f164ee073b3f5c67673d9d19e9a3111fa6d4521e0d3f2a0c8ea6cce"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_linux_arm64.zip",
+            "sha256": "58c72a93b419f7ae022630414e62ab66baf2b442c1c436fbf74ed0226370f1a5"
           },
           {
             "goos": "darwin",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.1/qoderwork_0.4.1_darwin_amd64.zip",
-            "sha256": "8e934ebd7dd293cac98163bb10be7b6367e08ee95d423bd49768fe5519037adf"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_darwin_amd64.zip",
+            "sha256": "184366bcdffcbe3841df5dda458fec726a2fcfb6b57396b1497376df2930d09b"
           },
           {
             "goos": "darwin",
             "goarch": "arm64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.1/qoderwork_0.4.1_darwin_arm64.zip",
-            "sha256": "febebdef09ffdc5c19008b17bf15693873bb80a71d311cae6ec3081d235d2282"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_darwin_arm64.zip",
+            "sha256": "bb707a60c0beb890470707160b93ec00fbee1b01bfb2906afc4e8ee6ab64b83b"
           },
           {
             "goos": "windows",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.1/qoderwork_0.4.1_windows_amd64.zip",
-            "sha256": "2b8314d4a2dc0ed01bef6f7b4cf7396bc51be9209822f331dcce23280b5d2216"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_windows_amd64.zip",
+            "sha256": "ca7dd756375d1340554e8ab06115393b69006b97a537d0785be1a75258c5f4d4"
           },
           {
             "goos": "windows",
             "goarch": "arm64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.1/qoderwork_0.4.1_windows_arm64.zip",
-            "sha256": "6273f14ca7e1ec291c56e38acad0e38419523f21bff82c5283c345c0b3bc01a4"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_windows_arm64.zip",
+            "sha256": "1f7772408f97d3d0ebbc6f7445cdb64416296424c8980e603cc920730e54ab5d"
           },
           {
             "goos": "freebsd",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.1/qoderwork_0.4.1_freebsd_amd64.zip",
-            "sha256": "417773ab2543f9ba3479b17bf13266258323bcd19af81e5c609ccda9a4a1eeae"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_freebsd_amd64.zip",
+            "sha256": "4bfcaeaa8eb77ed6fb46b52b498b6e8e36823ffdb576d975d10062f517ac1e58"
           }
         ]
       }
