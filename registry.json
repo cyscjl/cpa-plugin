@@ -6,7 +6,7 @@
       "name": "WorkBuddy",
       "description": "Tencent CodeBuddy (WorkBuddy) OAuth provider for CLIProxyAPI: multi-account login, dynamic models, chat executor, CN daily check-in, Global one-shot expert trial (manual), credit lifecycle (disable CN / delete Global when exhausted), credits panel with CN/Global filters, optional credits-aware scheduler.",
       "author": "Sliverkiss",
-      "version": "0.8.6",
+      "version": "0.8.8",
       "repository": "https://github.com/cyscjl/cpa-plugin",
       "logo": "https://raw.githubusercontent.com/DGZSbot/ai-icon/refs/heads/main/WorkBuddy.png",
       "homepage": "https://github.com/cyscjl/cpa-plugin/tree/main/workbuddy",
@@ -24,44 +24,44 @@
           {
             "goos": "linux",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_linux_amd64.zip",
-            "sha256": "68a7f5f0964c9812382a9f6269ac5015ecbe30732a7e117b782359514b18654d"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.8/workbuddy_0.8.8_linux_amd64.zip",
+            "sha256": "debf32b41daabd63b8596c10e60a5f2bcea68527044d003950a452b6c06e972e"
           },
           {
             "goos": "linux",
             "goarch": "arm64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_linux_arm64.zip",
-            "sha256": "0ef14789f021e7fd8504e44a062ad4c2f712f26188233a91dbba85f31cc7b24a"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.8/workbuddy_0.8.8_linux_arm64.zip",
+            "sha256": "49a204c41a1429d636a9e86e59c1d6836c14de13bc6fe3f62489dcefcc98cc9d"
           },
           {
             "goos": "darwin",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_darwin_amd64.zip",
-            "sha256": "0e88ddd9155405764530b260c3ced1074b68a0a3a92aa0c0e5e8544de8b45387"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.8/workbuddy_0.8.8_darwin_amd64.zip",
+            "sha256": "4ab4c420c0fbc694b520f451a39dc0fdafafb85e4c3874113c7f55dedd1f0966"
           },
           {
             "goos": "darwin",
             "goarch": "arm64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_darwin_arm64.zip",
-            "sha256": "3515bc65047d2ac12819d626ccc9ab9d332b3be794540209b104f6699d38d0ea"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.8/workbuddy_0.8.8_darwin_arm64.zip",
+            "sha256": "b70796c99c4871aab636f713aca5ed1b4632498e28fd8101cb72d2d8b11db197"
           },
           {
             "goos": "windows",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_windows_amd64.zip",
-            "sha256": "fc8ac74dc5a09c3089a83e92f5d470917ab8ec402744f3bcafba818f618fb2e3"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.8/workbuddy_0.8.8_windows_amd64.zip",
+            "sha256": "34ced3df69f8cc682a46d45f115a32299379cbd062d7fc97bd9601154fc76ec8"
           },
           {
             "goos": "windows",
             "goarch": "arm64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_windows_arm64.zip",
-            "sha256": "e5d272ff9a1658eea802d28df633dc78d3c9b3358ae116b7528c51fd5547d3bd"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.8/workbuddy_0.8.8_windows_arm64.zip",
+            "sha256": "0b0642257d03043d34741115e227caaf64e1c36633e5b469102dc3bb85c24f7e"
           },
           {
             "goos": "freebsd",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_freebsd_amd64.zip",
-            "sha256": "c1ec43a3eb1a7bcf9a60ea5cfc59743cec8f8d4eabf9d988583d1c6aa8013c3d"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.8/workbuddy_0.8.8_freebsd_amd64.zip",
+            "sha256": "c502c4c901764b98fb498c9ed274a92ce3187ebfa3a4e81c50e37117f219a979"
           }
         ]
       }
@@ -71,7 +71,7 @@
       "name": "QoderWork",
       "description": "QoderWork CN (qoder.com.cn) provider for CLIProxyAPI: dual login (OAuth device authorization with auto pro-pack claim + PAT import), COSY-signed chat executor, dynamic model list, daily check-in with credit snapshot, token keepalive (deviceToken/jobToken prefix-routed, PAT fallback), accounts panel.",
       "author": "Sliverkiss",
-      "version": "0.4.2",
+      "version": "0.4.3",
       "repository": "https://github.com/cyscjl/cpa-plugin",
       "logo": "https://raw.githubusercontent.com/DGZSbot/ai-icon/refs/heads/main/QoderWork.png",
       "homepage": "https://github.com/cyscjl/cpa-plugin/tree/main/qoderwork",
@@ -89,44 +89,44 @@
           {
             "goos": "linux",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_linux_amd64.zip",
-            "sha256": "7371bd17c8420867ea91561091a4be41f01f890f9a4531b6983e6c5378dd41b1"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.3/qoderwork_0.4.3_linux_amd64.zip",
+            "sha256": "38e1b48e0fbe82cfb68edd21f0c483984303c54dc44107fd4a757b5ad0bf81fd"
           },
           {
             "goos": "linux",
             "goarch": "arm64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_linux_arm64.zip",
-            "sha256": "58c72a93b419f7ae022630414e62ab66baf2b442c1c436fbf74ed0226370f1a5"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.3/qoderwork_0.4.3_linux_arm64.zip",
+            "sha256": "e20682cad665c69c974475615251a82c2ca98179475fd74a3a508ba177c7a4a2"
           },
           {
             "goos": "darwin",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_darwin_amd64.zip",
-            "sha256": "184366bcdffcbe3841df5dda458fec726a2fcfb6b57396b1497376df2930d09b"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.3/qoderwork_0.4.3_darwin_amd64.zip",
+            "sha256": "8f9342339ddb0e0eb286af88548eb06896aa9de8a68860ddf6db95631f6a3ca4"
           },
           {
             "goos": "darwin",
             "goarch": "arm64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_darwin_arm64.zip",
-            "sha256": "bb707a60c0beb890470707160b93ec00fbee1b01bfb2906afc4e8ee6ab64b83b"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.3/qoderwork_0.4.3_darwin_arm64.zip",
+            "sha256": "d070304e626b9558f087f60518dc48ebdca6d6fe63be3969a609fc4a1be78039"
           },
           {
             "goos": "windows",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_windows_amd64.zip",
-            "sha256": "ca7dd756375d1340554e8ab06115393b69006b97a537d0785be1a75258c5f4d4"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.3/qoderwork_0.4.3_windows_amd64.zip",
+            "sha256": "43d38c812dc14302bf3fd729d4a7c6db081b6945b6535415ffd4d4094814c337"
           },
           {
             "goos": "windows",
             "goarch": "arm64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_windows_arm64.zip",
-            "sha256": "1f7772408f97d3d0ebbc6f7445cdb64416296424c8980e603cc920730e54ab5d"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.3/qoderwork_0.4.3_windows_arm64.zip",
+            "sha256": "abbe38d105203694a4c015c34a7aa5a716e921cbd2eee9ed6b58ac2e74afa020"
           },
           {
             "goos": "freebsd",
             "goarch": "amd64",
-            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.2/qoderwork_0.4.2_freebsd_amd64.zip",
-            "sha256": "4bfcaeaa8eb77ed6fb46b52b498b6e8e36823ffdb576d975d10062f517ac1e58"
+            "url": "https://github.com/cyscjl/cpa-plugin/releases/download/qoderwork-v0.4.3/qoderwork_0.4.3_freebsd_amd64.zip",
+            "sha256": "7504a0897ed97ffb49bcc0a320dca0fcb71e3637d970c1acddc886c7926c01e9"
           }
         ]
       }
