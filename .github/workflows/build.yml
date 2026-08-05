@@ -398,26 +398,6 @@ jobs:
           PY
           python3 scripts/validate-registry.py registry.json
 
-      - name: Commit registry.json direct artifacts to main
-        env:
-          PLUGIN: ${{ steps.meta.outputs.plugin }}
-          VERSION: ${{ steps.meta.outputs.version }}
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Release runs on a tag checkout; move to main to publish registry for store.
-          git fetch origin main
-          git checkout -B main origin/main
-          # Re-apply the registry file produced above (still on disk from previous step).
-          git add registry.json
-          if git diff --cached --quiet; then
-            echo "registry.json unchanged"
-          else
-            git commit -m "chore(registry): ${PLUGIN} v${VERSION} direct artifacts"
-            git push origin main
-          fi
-
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -475,3 +455,40 @@ jobs:
               --title "${PLUGIN} v${VERSION}" \
               --notes "${NOTES}"
           fi
+
+      - name: Commit registry.json direct artifacts to main
+        # Best-effort only: never fail the job after release assets exist.
+        # Preserve rewritten registry.json across checkout via /tmp copy.
+        env:
+          PLUGIN: ${{ steps.meta.outputs.plugin }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set +e
+          set -u
+          if [ ! -f registry.json ]; then
+            echo "registry.json missing; skip"
+            exit 0
+          fi
+          cp registry.json /tmp/registry.release.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout -B main origin/main
+          cp /tmp/registry.release.json registry.json
+          git add registry.json
+          if git diff --cached --quiet; then
+            echo "registry.json unchanged"
+            exit 0
+          fi
+          git commit -m "chore(registry): ${PLUGIN} v${VERSION} direct artifacts" || exit 0
+          if git push origin main; then
+            echo "registry pushed"
+            exit 0
+          fi
+          echo "push raced; rebase once"
+          git pull --rebase origin main
+          cp /tmp/registry.release.json registry.json
+          git add registry.json
+          git commit -m "chore(registry): ${PLUGIN} v${VERSION} direct artifacts" 2>/dev/null || true
+          git push origin main || echo "::warning::registry.json push failed; release assets are still published"
+          exit 0
