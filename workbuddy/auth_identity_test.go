@@ -111,6 +111,84 @@ func TestHandleParseAuth_UnhandledForNonWorkbuddy(t *testing.T) {
 	}
 }
 
+// Issue #11: qoderwork-shaped credentials must never be claimed by workbuddy.
+func TestHandleParseAuth_RejectsQoderworkType(t *testing.T) {
+	req := pluginapi.AuthParseRequest{
+		Provider: "",
+		FileName: "qoderwork-uid.json",
+		RawJSON: []byte(`{
+			"type":"qoderwork",
+			"auth":{"accessToken":"jt-x","domain":"qoder.com.cn"},
+			"account":{"uid":"u1"}
+		}`),
+	}
+	body, _ := json.Marshal(req)
+	out, err := handleParseAuth(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if decodeParseAuth(t, out).Handled {
+		t.Fatal("must not claim type=qoderwork")
+	}
+}
+
+func TestHandleParseAuth_RejectsQoderDomainTypeless(t *testing.T) {
+	// Typeless nested auth with qoder domain — classic cross-claim victim.
+	req := pluginapi.AuthParseRequest{
+		Provider: "",
+		FileName: "mystery.json",
+		RawJSON: []byte(`{
+			"auth":{"accessToken":"jt-x","domain":"qoder.com.cn"},
+			"account":{"uid":"u1"}
+		}`),
+	}
+	body, _ := json.Marshal(req)
+	out, err := handleParseAuth(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if decodeParseAuth(t, out).Handled {
+		t.Fatal("must not claim qoder domain without our filename")
+	}
+}
+
+func TestHandleParseAuth_AcceptsTypelessCodebuddyByDomain(t *testing.T) {
+	req := pluginapi.AuthParseRequest{
+		Provider: "",
+		FileName: "legacy-import.json",
+		RawJSON: []byte(`{
+			"auth":{"accessToken":"at","refreshToken":"rt","domain":"www.codebuddy.cn"},
+			"account":{"uid":"u1"}
+		}`),
+	}
+	body, _ := json.Marshal(req)
+	out, err := handleParseAuth(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !decodeParseAuth(t, out).Handled {
+		t.Fatal("codebuddy domain typeless file should be claimed")
+	}
+}
+
+func TestToAuthData_StorageJSONEmbedsType(t *testing.T) {
+	sa := &storedAuth{
+		Auth:    storedTokens{AccessToken: "a", RefreshToken: "r", Domain: "www.codebuddy.cn"},
+		Account: storedAccount{UID: "u1", Nickname: "n"},
+	}
+	ad := toAuthData(sa)
+	var doc map[string]any
+	if err := json.Unmarshal(ad.StorageJSON, &doc); err != nil {
+		t.Fatal(err)
+	}
+	if doc["type"] != providerName {
+		t.Fatalf("StorageJSON type=%v want %s (issue #11)", doc["type"], providerName)
+	}
+	if doc["provider"] != providerName {
+		t.Fatalf("StorageJSON provider=%v", doc["provider"])
+	}
+}
+
 func TestToAuthDataForRefresh_EmptyFileNameAndID(t *testing.T) {
 	sa := &storedAuth{
 		Auth:    storedTokens{AccessToken: "a", RefreshToken: "r", Domain: "www.codebuddy.cn"},

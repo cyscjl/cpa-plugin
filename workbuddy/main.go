@@ -327,7 +327,7 @@ type registrationCapability struct {
 }
 
 // version is injected at build time via -ldflags "-X main.version=...".
-var version = "0.8.6"
+var version = "0.8.7"
 
 func wbRegistration() registration {
 	return registration{
@@ -579,27 +579,11 @@ func handleParseAuth(raw []byte) ([]byte, error) {
 	if err := json.Unmarshal(raw, &req); err != nil {
 		return nil, err
 	}
-	// Ownership check (CPA native contract): the host routes by the file's
-	// top-level "type" field (synthesizer/file.go). Files without a type fall
-	// back to polling every plugin — first Handled=true wins. Only claim files
-	// whose declared type matches us — or, for type-less legacy files, when the
-	// host already routed this to us or the filename carries our prefix.
-	// Symmetric with the qoderwork plugin's guard (commit 7b776a9).
-	var probeType struct {
-		Type string `json:"type"`
-	}
-	_ = json.Unmarshal(req.RawJSON, &probeType)
-	declared := strings.ToLower(strings.TrimSpace(probeType.Type))
-	if declared != "" && declared != providerName {
-		// Explicitly another provider's file — never claim it.
+	// Ownership check (issue #11): host routes by top-level "type"; type-less
+	// files are polled across plugins and first Handled=true wins. Never claim
+	// qoderwork (or other) credentials — type / filename / domain must match us.
+	if !ownsWorkbuddyAuth(req.FileName, req.Provider, req.RawJSON) {
 		return okEnvelope(pluginapi.AuthParseResponse{Handled: false})
-	}
-	if declared == "" {
-		routed := strings.EqualFold(strings.TrimSpace(req.Provider), providerName)
-		prefixed := strings.HasPrefix(strings.ToLower(strings.TrimSpace(req.FileName)), providerName+"-")
-		if !routed && !prefixed {
-			return okEnvelope(pluginapi.AuthParseResponse{Handled: false})
-		}
 	}
 	sa, err := parseStored(req.RawJSON)
 	if err != nil {
@@ -633,7 +617,19 @@ func toAuthData(sa *storedAuth) pluginapi.AuthData {
 
 // toAuthDataOpts builds AuthData with optional credits snapshot and disabled flag.
 func toAuthDataOpts(sa *storedAuth, cr *creditsSummary, disabled bool) pluginapi.AuthData {
-	storage, _ := json.Marshal(sa)
+	// ALWAYS embed top-level type/provider in StorageJSON. Bare json.Marshal(sa)
+	// drops them; the host then re-polls ParseAuth and a sibling plugin can
+	// steal the file (Sliverkiss/cpa-plugin#11).
+	note := ""
+	if meta := enrichAuthMetadata(sa, cr, disabled); meta != nil {
+		if n, ok := meta["note"].(string); ok {
+			note = n
+		}
+	}
+	storage, err := buildAuthFileJSON(sa, disabled, note, nil)
+	if err != nil || len(storage) == 0 {
+		storage, _ = json.Marshal(sa)
+	}
 	id := providerName
 	fileName := authFileName
 	if sa != nil {
@@ -655,6 +651,52 @@ func toAuthDataOpts(sa *storedAuth, cr *creditsSummary, disabled bool) pluginapi
 		// auth-file classification; `logo`/`note`/`disabled` surface on auth rows.
 		Metadata: meta,
 	}
+}
+
+// ownsWorkbuddyAuth is the single ownership gate for ParseAuth (issue #11).
+// Order: explicit type → foreign domain reject → our domain / filename / route.
+func ownsWorkbuddyAuth(fileName, hostProvider string, raw []byte) bool {
+	var probe struct {
+		Type string `json:"type"`
+		Auth struct {
+			Domain string `json:"domain"`
+		} `json:"auth"`
+		Domain string `json:"domain"` // flat shape
+	}
+	_ = json.Unmarshal(raw, &probe)
+	declared := strings.ToLower(strings.TrimSpace(probe.Type))
+	if declared != "" {
+		return declared == providerName
+	}
+	domain := strings.TrimSpace(probe.Auth.Domain)
+	if domain == "" {
+		domain = strings.TrimSpace(probe.Domain)
+	}
+	if domain != "" {
+		if isForeignQoderDomain(domain) {
+			return false
+		}
+		if isWorkbuddyFamilyDomain(domain) {
+			return true
+		}
+	}
+	fn := strings.ToLower(strings.TrimSpace(fileName))
+	if fn == authFileName || strings.HasPrefix(fn, providerName+"-") {
+		return true
+	}
+	return strings.EqualFold(strings.TrimSpace(hostProvider), providerName)
+}
+
+func isWorkbuddyFamilyDomain(domain string) bool {
+	d := strings.ToLower(strings.TrimSpace(domain))
+	return strings.Contains(d, "codebuddy.cn") ||
+		strings.Contains(d, "workbuddy.ai") ||
+		strings.Contains(d, "copilot.tencent.com")
+}
+
+func isForeignQoderDomain(domain string) bool {
+	d := strings.ToLower(strings.TrimSpace(domain))
+	return strings.Contains(d, "qoder.com")
 }
 
 // -----------------------------------------------------------------------------

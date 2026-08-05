@@ -334,7 +334,7 @@ type registrationCapability struct {
 }
 
 // version is injected at build time via -ldflags "-X main.version=...".
-var version = "0.4.1"
+var version = "0.4.2"
 
 func wbRegistration() registration {
 	return registration{
@@ -569,30 +569,10 @@ func handleParseAuth(raw []byte) ([]byte, error) {
 	if err := json.Unmarshal(raw, &req); err != nil {
 		return nil, err
 	}
-	// Ownership check (CPA native contract): the host routes by the file's
-	// top-level "type" field (synthesizer/file.go). Files without a type fall
-	// back to polling every plugin — first Handled=true wins. To prevent
-	// claiming foreign providers' legacy files (e.g. workbuddy's type-less
-	// auths, which parseStored would otherwise accept because the nested
-	// {auth,account} shape is identical), only claim files whose declared
-	// type matches us — or whose filename carries our prefix.
-	var probeType struct {
-		Type string `json:"type"`
-	}
-	_ = json.Unmarshal(req.RawJSON, &probeType)
-	declared := strings.ToLower(strings.TrimSpace(probeType.Type))
-	if declared != "" && declared != providerName {
-		// Explicitly another provider's file — never claim it.
+	// Ownership check (issue #11): never claim workbuddy type-less files.
+	// type / filename / domain must identify qoderwork.
+	if !ownsQoderworkAuth(req.FileName, req.Provider, req.RawJSON) {
 		return okEnvelope(pluginapi.AuthParseResponse{Handled: false})
-	}
-	if declared == "" {
-		// No type declared: only claim when the host already routed this to us
-		// (req.Provider == qoderwork) or the filename carries our prefix.
-		routed := strings.EqualFold(strings.TrimSpace(req.Provider), providerName)
-		prefixed := strings.HasPrefix(strings.ToLower(strings.TrimSpace(req.FileName)), providerName+"-")
-		if !routed && !prefixed {
-			return okEnvelope(pluginapi.AuthParseResponse{Handled: false})
-		}
 	}
 	sa, err := parseStored(req.RawJSON)
 	if err != nil {
@@ -626,7 +606,17 @@ func toAuthData(sa *storedAuth) pluginapi.AuthData {
 
 // toAuthDataOpts builds AuthData with optional credits snapshot and disabled flag.
 func toAuthDataOpts(sa *storedAuth, cr *creditsSummary, disabled bool) pluginapi.AuthData {
-	storage, _ := json.Marshal(sa)
+	// ALWAYS embed top-level type/provider in StorageJSON (issue #11).
+	note := ""
+	if meta := enrichAuthMetadata(sa, cr, disabled); meta != nil {
+		if n, ok := meta["note"].(string); ok {
+			note = n
+		}
+	}
+	storage, err := buildAuthFileJSON(sa, disabled, note, nil)
+	if err != nil || len(storage) == 0 {
+		storage, _ = json.Marshal(sa)
+	}
 	id := providerName
 	fileName := authFileName
 	if sa != nil {
@@ -648,6 +638,51 @@ func toAuthDataOpts(sa *storedAuth, cr *creditsSummary, disabled bool) pluginapi
 		// auth-file classification; `logo`/`note`/`disabled` surface on auth rows.
 		Metadata: meta,
 	}
+}
+
+// ownsQoderworkAuth gates ParseAuth so we never steal workbuddy auths (#11).
+func ownsQoderworkAuth(fileName, hostProvider string, raw []byte) bool {
+	var probe struct {
+		Type string `json:"type"`
+		Auth struct {
+			Domain string `json:"domain"`
+		} `json:"auth"`
+		Domain string `json:"domain"`
+	}
+	_ = json.Unmarshal(raw, &probe)
+	declared := strings.ToLower(strings.TrimSpace(probe.Type))
+	if declared != "" {
+		return declared == providerName
+	}
+	domain := strings.TrimSpace(probe.Auth.Domain)
+	if domain == "" {
+		domain = strings.TrimSpace(probe.Domain)
+	}
+	if domain != "" {
+		if isForeignWorkbuddyDomain(domain) {
+			return false
+		}
+		if isQoderFamilyDomain(domain) {
+			return true
+		}
+	}
+	fn := strings.ToLower(strings.TrimSpace(fileName))
+	if fn == authFileName || strings.HasPrefix(fn, providerName+"-") {
+		return true
+	}
+	return strings.EqualFold(strings.TrimSpace(hostProvider), providerName)
+}
+
+func isQoderFamilyDomain(domain string) bool {
+	d := strings.ToLower(strings.TrimSpace(domain))
+	return strings.Contains(d, "qoder.com")
+}
+
+func isForeignWorkbuddyDomain(domain string) bool {
+	d := strings.ToLower(strings.TrimSpace(domain))
+	return strings.Contains(d, "codebuddy.cn") ||
+		strings.Contains(d, "workbuddy.ai") ||
+		strings.Contains(d, "copilot.tencent.com")
 }
 
 // -----------------------------------------------------------------------------

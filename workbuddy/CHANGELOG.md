@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.7
+
+### Fix auth cross-claim with qoderwork (issue #11)
+
+- `handleParseAuth` ownership gate: type / domain / filename — never claim
+  `qoderwork` or `qoder.com*` credentials.
+- `toAuthDataOpts` always writes top-level `type`+`provider` into StorageJSON
+  via `buildAuthFileJSON` so host re-saves cannot strip identity.
+- `hostAuthList` also matches legacy bare `workbuddy.json`.
+
 ## 0.8.6
 
 ### Dynamic models first + Kimi K3 + store install fix

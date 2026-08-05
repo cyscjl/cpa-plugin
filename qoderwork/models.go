@@ -65,7 +65,8 @@ func fetchDynamicModels() []pluginapi.ModelInfo {
 	// the qoderwork models API with a workbuddy token.)
 	prefix := providerName + "-"
 	for _, f := range files {
-		if !strings.HasPrefix(strings.ToLower(f.Name), prefix) {
+		lower := strings.ToLower(strings.TrimSpace(f.Name))
+		if lower != authFileName && !strings.HasPrefix(lower, prefix) {
 			continue
 		}
 		raw, err := hostAuthGetByIndex(f.AuthIndex)
