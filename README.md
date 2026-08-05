@@ -53,16 +53,24 @@ plugins:
 
 ## 远程更新（插件商店自定义源）
 
-CPA 插件商店源添加：
+本 fork 的 CPA 插件商店源请添加（**不要**再用上游 `Sliverkiss/cpa-plugin`，否则装不到本仓库构建的 so）：
 
 ```text
-https://raw.githubusercontent.com/Sliverkiss/cpa-plugin/main/registry.json
+https://raw.githubusercontent.com/cyscjl/cpa-plugin/main/registry.json
 ```
 
-然后在商店 UI 安装/更新 **workbuddy** 和 **qoderwork**。
+然后在商店 UI 安装/更新 **workbuddy**（当前 direct 产物 **v0.8.6**，含 `linux/amd64` `.so`）和 **qoderwork**。
 
-> **Note (CPA ≥ 7.2 / issue #9):** 本仓库是 monorepo，GitHub Release tag 为
-> `workbuddy-v0.8.5` / `qoderwork-v0.2.6`。CPA 的 `github-release` 安装路径只接受
-> 纯版本 tag（`v0.8.5` / `0.8.5`），因此 `registry.json` 使用 **schema v2 +
-> `install.type: direct`**，直接指向各架构 zip + sha256，避免
-> `invalid release tag "workbuddy-v0.8.5"` → 安装 502。
+Linux 也可直接下：
+
+```bash
+curl -LO https://github.com/cyscjl/cpa-plugin/releases/download/workbuddy-v0.8.6/workbuddy_0.8.6_linux_amd64.zip
+unzip workbuddy_0.8.6_linux_amd64.zip
+cp workbuddy.so /path/to/cliproxyapi/plugins/workbuddy.so
+# 重启 CPA
+```
+
+> **Note (CPA ≥ 7.2 / issue #9):** monorepo Release tag 为 `workbuddy-v0.8.6`。
+> CPA 的 `github-release` 只接受纯版本 tag（`v0.8.6`），因此本仓库
+> `registry.json` 使用 **schema v2 + `install.type: direct`**（zip URL + sha256），
+> 避免 `invalid release tag "workbuddy-v*"` → 安装 502。
