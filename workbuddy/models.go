@@ -17,17 +17,28 @@ import (
 )
 
 func wbModels() []pluginapi.ModelInfo {
+	// Static fallback ONLY when dynamic discovery fails (no auth / API error).
+	// Prefer preferredModels() which hits /console/enterprises/personal/models.
+	// IDs verified against live CN catalog (2026-08): K3 = "kimi-k3-1".
+	chat := []string{"chat"}
+	m := func(id, name string, ctx, max int64) pluginapi.ModelInfo {
+		return pluginapi.ModelInfo{
+			ID: id, Name: name, ContextLength: ctx, MaxCompletionTokens: max,
+			OwnedBy: providerName, SupportedGenerationMethods: chat,
+		}
+	}
 	return []pluginapi.ModelInfo{
-		{ID: "glm-5.2", Name: "GLM-5.2", ContextLength: 1000000, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
-		{ID: "glm-5.1", Name: "GLM-5.1", ContextLength: 131072, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
-		{ID: "glm-5v-turbo", Name: "GLM-5V Turbo", ContextLength: 131072, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
-		{ID: "kimi-k2.7", Name: "Kimi K2.7", ContextLength: 262144, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
-		{ID: "minimax-m3", Name: "MiniMax M3", ContextLength: 204800, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
-		{ID: "hy3", Name: "Hy3", ContextLength: 262144, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
-		{ID: "hy3-preview", Name: "Hy3 Preview", ContextLength: 262144, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
-		{ID: "hy3-preview-agent", Name: "Hy3 Preview Agent", ContextLength: 262144, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
-		{ID: "deepseek-v4-pro", Name: "DeepSeek V4 Pro", ContextLength: 1000000, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
-		{ID: "deepseek-v4-flash", Name: "DeepSeek V4 Flash", ContextLength: 1000000, MaxCompletionTokens: 8192, OwnedBy: providerName, SupportedGenerationMethods: []string{"chat"}},
+		m("auto", "Auto", 262144, 8192),
+		m("hy3", "Hy3", 262144, 8192),
+		m("glm-5.2", "GLM-5.2", 1000000, 8192),
+		m("glm-5.1", "GLM-5.1", 131072, 8192),
+		m("glm-5v-turbo", "GLM-5v-Turbo", 131072, 8192),
+		m("kimi-k3-1", "Kimi-K3", 262144, 8192),
+		m("kimi-k2.7", "Kimi-K2.7-Code", 262144, 8192),
+		m("kimi-k2.6", "Kimi-K2.6", 262144, 8192),
+		m("minimax-m3", "MiniMax-M3", 204800, 8192),
+		m("deepseek-v4-flash", "DeepSeek-V4-Flash", 1000000, 8192),
+		m("deepseek-v4-pro", "DeepSeek-V4-Pro", 1000000, 8192),
 	}
 }
 
@@ -48,27 +59,50 @@ func storeDynamicModels(models []pluginapi.ModelInfo) {
 }
 
 func fetchDynamicModelsFromStorage(storageJSON []byte) []pluginapi.ModelInfo {
+	return preferredModels(storageJSON)
+}
+
+// preferredModels is dynamic-first:
+//  1) in-memory cache (TTL)
+//  2) access token from preferredStorage (model.for_auth)
+//  3) any live workbuddy auth on the host (so model.static also gets live catalog)
+//  4) hardcoded wbModels() fallback only when discovery fails
+func preferredModels(preferredStorage []byte) []pluginapi.ModelInfo {
 	if models, ok := cachedDynamicModels(); ok {
 		return models
 	}
-	accessToken := ""
-	if len(storageJSON) > 0 {
-		if tok, ok := extractAccessToken(storageJSON); ok {
-			accessToken = tok
+	tryToken := func(accessToken string) ([]pluginapi.ModelInfo, bool) {
+		accessToken = strings.TrimSpace(accessToken)
+		if accessToken == "" {
+			return nil, false
+		}
+		dyn, err := callModelsAPI(accessToken)
+		if err != nil || len(dyn) == 0 {
+			return nil, false
+		}
+		storeDynamicModels(dyn)
+		return dyn, true
+	}
+	if tok, ok := extractAccessToken(preferredStorage); ok {
+		if dyn, ok := tryToken(tok); ok {
+			return dyn
 		}
 	}
-	if accessToken == "" {
-		return wbModels()
-	}
-	if dyn, err := callModelsAPI(accessToken); err == nil && len(dyn) > 0 {
-		storeDynamicModels(dyn)
-		return dyn
+	// model.static has no per-auth storage — borrow any logged-in account.
+	if files, err := hostAuthList(); err == nil {
+		for _, f := range files {
+			sa, err := hostAuthGet(f.AuthIndex)
+			if err != nil || sa == nil {
+				continue
+			}
+			if dyn, ok := tryToken(sa.Auth.AccessToken); ok {
+				return dyn
+			}
+		}
 	}
 	return wbModels()
 }
 
-// fetchDynamicModels calls the WorkBuddy API to get the latest model list.
-// Falls back to the hardcoded list on any error.
 // extractAccessToken handles both flat (CPA UI) and nested (plugin OAuth) auth file shapes.
 func extractAccessToken(raw []byte) (string, bool) {
 	// flat shape from CPA-Manager-Plus UI
@@ -144,6 +178,13 @@ func callModelsAPI(accessToken string) ([]pluginapi.ModelInfo, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("models API status %d", resp.StatusCode)
 	}
+	return parseModelsAPIBody(body)
+}
+
+// parseModelsAPIBody decodes CodeBuddy /console/.../models JSON.
+// Prefer agents[name=cli].models order when present, but keep other enabled
+// catalog entries so new models missing from the cli agent list still appear.
+func parseModelsAPIBody(body []byte) ([]pluginapi.ModelInfo, error) {
 	var apiResp struct {
 		Code int `json:"code"`
 		Data struct {
@@ -177,17 +218,7 @@ func callModelsAPI(accessToken string) ([]pluginapi.ModelInfo, error) {
 	if apiResp.Code != 0 {
 		return nil, fmt.Errorf("models API code %d", apiResp.Code)
 	}
-	var cliModelIDs []string
-	for _, a := range apiResp.Data.Agents {
-		if a.Name == "cli" {
-			cliModelIDs = a.Models
-			break
-		}
-	}
-	if len(cliModelIDs) == 0 {
-		return nil, fmt.Errorf("no cli agent models found")
-	}
-	dynMap := make(map[string]struct {
+	type dynModel struct {
 		ID                 string          `json:"id"`
 		Name               string          `json:"name"`
 		Description        string          `json:"description"`
@@ -204,16 +235,62 @@ func callModelsAPI(accessToken string) ([]pluginapi.ModelInfo, error) {
 		DisabledReason     string          `json:"disabledReason"`
 		ContextWindow      json.RawMessage `json:"contextWindow"`
 		MaxTokens          json.RawMessage `json:"maxTokens"`
-	}, len(apiResp.Data.Models))
-	for _, m := range apiResp.Data.Models {
-		dynMap[m.ID] = m
 	}
-	var out []pluginapi.ModelInfo
-	for _, id := range cliModelIDs {
-		m, ok := dynMap[id]
-		if !ok {
+	cliOrder := make([]string, 0)
+	cliSet := map[string]struct{}{}
+	for _, a := range apiResp.Data.Agents {
+		if !strings.EqualFold(strings.TrimSpace(a.Name), "cli") {
 			continue
 		}
+		for _, id := range a.Models {
+			id = strings.TrimSpace(id)
+			if id == "" {
+				continue
+			}
+			if _, seen := cliSet[id]; seen {
+				continue
+			}
+			cliSet[id] = struct{}{}
+			cliOrder = append(cliOrder, id)
+		}
+		break
+	}
+	dynMap := make(map[string]dynModel, len(apiResp.Data.Models))
+	for _, m := range apiResp.Data.Models {
+		id := strings.TrimSpace(m.ID)
+		if id == "" {
+			continue
+		}
+		m.ID = id
+		dynMap[id] = m
+	}
+	orderedIDs := make([]string, 0, len(dynMap))
+	seen := map[string]struct{}{}
+	appendID := func(id string) {
+		if _, ok := seen[id]; ok {
+			return
+		}
+		if _, ok := dynMap[id]; !ok {
+			return
+		}
+		seen[id] = struct{}{}
+		orderedIDs = append(orderedIDs, id)
+	}
+	for _, id := range cliOrder {
+		appendID(id)
+	}
+	for _, m := range apiResp.Data.Models {
+		if m.Disabled {
+			continue
+		}
+		appendID(strings.TrimSpace(m.ID))
+	}
+	if len(orderedIDs) == 0 {
+		return nil, fmt.Errorf("no models found in upstream catalog")
+	}
+	var out []pluginapi.ModelInfo
+	for _, id := range orderedIDs {
+		m := dynMap[id]
 		if m.Disabled {
 			continue
 		}
@@ -231,14 +308,21 @@ func callModelsAPI(accessToken string) ([]pluginapi.ModelInfo, error) {
 				maxTok = int64(v)
 			}
 		}
+		name := strings.TrimSpace(m.Name)
+		if name == "" {
+			name = m.ID
+		}
 		out = append(out, pluginapi.ModelInfo{
 			ID:                         m.ID,
-			Name:                       m.Name,
+			Name:                       name,
 			ContextLength:              ctxLen,
 			MaxCompletionTokens:        maxTok,
 			OwnedBy:                    providerName,
 			SupportedGenerationMethods: []string{"chat"},
 		})
+	}
+	if len(out) == 0 {
+		return nil, fmt.Errorf("all upstream models disabled")
 	}
 	return out, nil
 }
@@ -389,7 +473,8 @@ func handleModelStatic(raw []byte) ([]byte, error) {
 		return nil, err
 	}
 	cacheModelAliases(req.Host)
-	models := wbModels()
+	// Dynamic-first even on model.static: use any host auth token when present.
+	models := preferredModels(nil)
 	models = filterExcludedModels(models, req.Host)
 	return okEnvelope(pluginapi.ModelResponse{Provider: providerName, Models: models})
 }
@@ -404,7 +489,7 @@ func handleModelForAuth(raw []byte) ([]byte, error) {
 	// req.AuthProvider back would silently drop the model list whenever the
 	// auth file carries a non-canonical provider string.
 	cacheModelAliases(req.Host)
-	models := fetchDynamicModelsFromStorage(req.StorageJSON)
+	models := preferredModels(req.StorageJSON)
 	models = filterExcludedModels(models, req.Host)
 	return okEnvelope(pluginapi.ModelResponse{Provider: providerName, Models: models})
 }

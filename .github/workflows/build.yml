@@ -340,23 +340,83 @@ jobs:
             test -f "out/${PLUGIN}_${VERSION}_${t}.zip" || { echo "missing ${PLUGIN}_${VERSION}_${t}.zip"; exit 1; }
           done
 
-      - name: Sync registry.json version (this plugin only)
+      - name: Sync registry.json version + direct artifacts (this plugin only)
+        env:
+          PLUGIN: ${{ steps.meta.outputs.plugin }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          pid, v, tag, repo = (
+              os.environ["PLUGIN"],
+              os.environ["VERSION"],
+              os.environ["TAG"],
+              os.environ["REPO"],
+          )
+          out_dir = pathlib.Path("out")
+          checksums = {}
+          for line in (out_dir / "checksums.txt").read_text().splitlines():
+              line = line.strip()
+              if not line:
+                  continue
+              sha, name = re.split(r"\s+", line, maxsplit=1)
+              checksums[name.strip()] = sha.strip().lower()
+          platforms = [
+              ("linux", "amd64"),
+              ("linux", "arm64"),
+              ("darwin", "amd64"),
+              ("darwin", "arm64"),
+              ("windows", "amd64"),
+              ("windows", "arm64"),
+              ("freebsd", "amd64"),
+          ]
+          artifacts = []
+          for goos, goarch in platforms:
+              name = f"{pid}_{v}_{goos}_{goarch}.zip"
+              sha = checksums.get(name)
+              if not sha:
+                  raise SystemExit(f"missing checksum for {name}")
+              url = f"https://github.com/{repo}/releases/download/{tag}/{name}"
+              artifacts.append({
+                  "goos": goos,
+                  "goarch": goarch,
+                  "url": url,
+                  "sha256": sha,
+              })
+          p = pathlib.Path("registry.json")
+          data = json.loads(p.read_text(encoding="utf-8"))
+          data["schema_version"] = 2
+          for plug in data.get("plugins", []):
+              if plug.get("id") != pid:
+                  continue
+              plug["version"] = v
+              plug["install"] = {"type": "direct", "artifacts": artifacts}
+          p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+          print(p.read_text(encoding="utf-8"))
+          PY
+          python3 scripts/validate-registry.py registry.json
+
+      - name: Commit registry.json direct artifacts to main
         env:
           PLUGIN: ${{ steps.meta.outputs.plugin }}
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          python3 - <<'PY'
-          import json, os, pathlib
-          pid, v = os.environ["PLUGIN"], os.environ["VERSION"]
-          p = pathlib.Path("registry.json")
-          data = json.loads(p.read_text())
-          for plug in data.get("plugins", []):
-              if plug.get("id") == pid:
-                  plug["version"] = v
-          p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
-          print(p.read_text())
-          PY
-          python3 scripts/validate-registry.py registry.json
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Release runs on a tag checkout; move to main to publish registry for store.
+          git fetch origin main
+          git checkout -B main origin/main
+          # Re-apply the registry file produced above (still on disk from previous step).
+          git add registry.json
+          if git diff --cached --quiet; then
+            echo "registry.json unchanged"
+          else
+            git commit -m "chore(registry): ${PLUGIN} v${VERSION} direct artifacts"
+            git push origin main
+          fi
 
       - name: Publish GitHub release
         env:
@@ -398,10 +458,13 @@ jobs:
           cp ${PLUGIN}.so /path/to/cliproxyapi/plugins/${PLUGIN}.so
           \`\`\`
 
-          ### Remote update (custom plugin source)
+          ### Remote update (custom plugin source on this fork)
           \`\`\`
-          https://raw.githubusercontent.com/Sliverkiss/cpa-plugin/main/registry.json
+          https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/registry.json
           \`\`\`
+
+          Install type is **direct** (schema v2) so monorepo tags like
+          \`${PLUGIN}-v${VERSION}\` work with CPA plugin store.
           EOF
           )
           if gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then

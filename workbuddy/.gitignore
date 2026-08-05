@@ -22,3 +22,8 @@ Thumbs.db
 # Local dev
 .env
 .env.local
+
+# OAuth probe scratch (tokens/cookies/logs — never commit)
+scripts/_probe_*
+scripts/_poll_log.txt
+scripts/_models_redacted.json

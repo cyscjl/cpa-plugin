@@ -60,3 +60,9 @@ https://raw.githubusercontent.com/Sliverkiss/cpa-plugin/main/registry.json
 ```
 
 然后在商店 UI 安装/更新 **workbuddy** 和 **qoderwork**。
+
+> **Note (CPA ≥ 7.2 / issue #9):** 本仓库是 monorepo，GitHub Release tag 为
+> `workbuddy-v0.8.5` / `qoderwork-v0.2.6`。CPA 的 `github-release` 安装路径只接受
+> 纯版本 tag（`v0.8.5` / `0.8.5`），因此 `registry.json` 使用 **schema v2 +
+> `install.type: direct`**，直接指向各架构 zip + sha256，避免
+> `invalid release tag "workbuddy-v0.8.5"` → 安装 502。

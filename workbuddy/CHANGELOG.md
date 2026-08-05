@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.8.6
+
+### Dynamic models first + Kimi K3 + store install fix
+
+- `models.go` — **dynamic-first** model list: cache → auth token → any host
+  workbuddy credential → static fallback. `model.static` no longer always
+  returns the hardcoded list when a login exists.
+- `models.go` — `parseModelsAPIBody` keeps full enabled catalog (not only
+  `agents.cli` order), so new models are not dropped when cli list lags.
+- Static fallback updated from live CN catalog: **`kimi-k3-1`** (display
+  `Kimi-K3`; bare `kimi-k3` is wrong).
+- `registry.json` — schema v2 **`install.type: direct`** with pinned zip
+  URLs + sha256 (fixes CPA store 502 / `invalid release tag
+  "workbuddy-v*"` monorepo tag issue, GitHub #9).
+- CI release step rewrites direct artifacts from `checksums.txt`.
+
 ## 0.8.2
 
 ### Concurrency + lifecycle hardening
